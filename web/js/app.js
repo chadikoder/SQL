@@ -58,7 +58,7 @@ function highlightPhp(code) {
     return `__SAWAHOLD${i}HOLD__`;
   };
   // Strings
-  s = s.replace(/("(?:[^"\]|\.)*"|'(?:[^'\]|\.)*')/g, m => hold("str", m));
+  s = s.replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g, m => hold("str", m));
   // Comments
   s = s.replace(/(--[^\n]*|\/\*[\s\S]*?\*\/)/g, m => hold("com", m));
   // SQL keywords
