@@ -6,45 +6,27 @@ let exFilter = "all";
 const W3_URLS = {
   "w3-intro": "https://www.w3schools.com/sql/sql_intro.asp",
   "w3-syntax": "https://www.w3schools.com/sql/sql_syntax.asp",
-  "w3-variables": "https://www.w3schools.com/sql/sql_variables.asp",
-  "w3-echo": "https://www.w3schools.com/sql/sql_echo_print.asp",
-  "w3-types": "https://www.w3schools.com/sql/sql_datatypes.asp",
-  "w3-strings": "https://www.w3schools.com/sql/sql_string.asp",
-  "w3-numbers": "https://www.w3schools.com/sql/sql_numbers.asp",
-  "w3-constants": "https://www.w3schools.com/sql/sql_constants.asp",
-  "w3-operators": "https://www.w3schools.com/sql/sql_operators.asp",
-  "w3-if": "https://www.w3schools.com/sql/sql_if_else.asp",
-  "w3-loops": "https://www.w3schools.com/sql/sql_looping.asp",
-  "w3-functions-basic": "https://www.w3schools.com/sql/sql_functions.asp",
-  "w3-arrays-basic": "https://www.w3schools.com/sql/sql_arrays.asp",
-  "w3-superglobals": "https://www.w3schools.com/sql/sql_superglobals.asp",
-  "w3-forms": "https://www.w3schools.com/sql/sql_forms.asp",
-  "w3-validation": "https://www.w3schools.com/sql/sql_form_validation.asp",
-  "w3-regex": "https://www.w3schools.com/sql/sql_regex.asp",
-  "w3-date": "https://www.w3schools.com/sql/sql_date.asp",
-  "w3-include": "https://www.w3schools.com/sql/sql_includes.asp",
-  "w3-file": "https://www.w3schools.com/sql/sql_file_open.asp",
-  "w3-upload": "https://www.w3schools.com/sql/sql_file_upload.asp",
-  "w3-cookies": "https://www.w3schools.com/sql/sql_cookies.asp",
-  "w3-sessions": "https://www.w3schools.com/sql/sql_sessions.asp",
-  "w3-json": "https://www.w3schools.com/sql/sql_json.asp",
-  "w3-oop": "https://www.w3schools.com/sql/sql_oop_what_is.asp",
-  "w3-constructor": "https://www.w3schools.com/sql/sql_oop_classes_objects.asp",
-  "w3-modifiers": "https://www.w3schools.com/sql/sql_oop_access_modifiers.asp",
-  "w3-inheritance": "https://www.w3schools.com/sql/sql_oop_inheritance.asp",
-  "w3-abstract": "https://www.w3schools.com/sql/sql_oop_classes_abstract.asp",
-  "w3-interfaces": "https://www.w3schools.com/sql/sql_oop_interfaces.asp",
-  "w3-static": "https://www.w3schools.com/sql/sql_oop_static_methods.asp",
-  "w3-exceptions": "https://www.w3schools.com/sql/sql_exception.asp",
-  "w3-mysql": "https://www.w3schools.com/sql/sql_mysql_intro.asp",
-  "w3-traits": "https://www.w3schools.com/sql/sql_oop_traits.asp",
-  "day-1": "https://www.w3schools.com/sql/sql_syntax.asp",
-  "day-2": "https://www.w3schools.com/sql/sql_functions.asp",
-  "day-3": "https://www.w3schools.com/sql/sql_form_validation.asp",
-  "day-4": "https://www.w3schools.com/sql/sql_sessions.asp",
-  "day-5": "https://www.w3schools.com/sql/sql_mysql_intro.asp",
-  "day-6": "https://www.w3schools.com/sql/sql_file_upload.asp",
-  "day-7": "https://www.w3schools.com/sql/sql_oop_what_is.asp",
+  "w3-select": "https://www.w3schools.com/sql/sql_select.asp",
+  "w3-where": "https://www.w3schools.com/sql/sql_where.asp",
+  "w3-and-or": "https://www.w3schools.com/sql/sql_and_or.asp",
+  "w3-order-by": "https://www.w3schools.com/sql/sql_orderby.asp",
+  "w3-joins": "https://www.w3schools.com/sql/sql_join.asp",
+  "w3-group-by": "https://www.w3schools.com/sql/sql_groupby.asp",
+  "w3-aliases": "https://www.w3schools.com/sql/sql_alias.asp",
+  "w3-insert": "https://www.w3schools.com/sql/sql_insert.asp",
+  "w3-update": "https://www.w3schools.com/sql/sql_update.asp",
+  "w3-delete": "https://www.w3schools.com/sql/sql_delete.asp",
+  "w3-indexes": "https://www.w3schools.com/sql/sql_create_index.asp",
+  "w3-transactions": "https://www.w3schools.com/sql/sql_transactions.asp",
+  "w3-views": "https://www.w3schools.com/sql/sql_view.asp",
+  "w3-constraints": "https://www.w3schools.com/sql/sql_constraints.asp",
+  "day-1": "https://www.w3schools.com/sql/sql_where.asp",
+  "day-2": "https://www.w3schools.com/sql/sql_orderby.asp",
+  "day-3": "https://www.w3schools.com/sql/sql_join.asp",
+  "day-4": "https://www.w3schools.com/sql/sql_groupby.asp",
+  "day-5": "https://www.w3schools.com/sql/sql_with.asp",
+  "day-6": "https://www.w3schools.com/sql/sql_update.asp",
+  "day-7": "https://www.w3schools.com/sql/sql_create_index.asp"
 };
 
 function loadState() {
@@ -75,14 +57,14 @@ function highlightPhp(code) {
     stash.push(`<span class="${cls}">${text}</span>`);
     return `__SAWAHOLD${i}HOLD__`;
   };
-  s = s.replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g, m => hold("str", m));
-  s = s.replace(/(\/\/[^\n]*|\/\*[\s\S]*?\*\/|#[^\n]*)/g, m => hold("com", m));
-  s = s.replace(/\b(function|return|if|else|elseif|while|for|foreach|as|switch|case|default|break|continue|do|class|new|public|private|protected|static|const|use|namespace|require|require_once|include|include_once|echo|print|die|exit|true|false|null|self|parent|instanceof|extends|implements|interface|trait|try|catch|finally|throw|fn|match|declare|global|and|or|xor)\b/g, '<span class="kw">$1</span>');
-  s = s.replace(/(\$\w+)/g, '<span class="var">$1</span>');
+  // Strings
+  s = s.replace(/("(?:[^"\]|\.)*"|'(?:[^'\]|\.)*')/g, m => hold("str", m));
+  // Comments
+  s = s.replace(/(--[^\n]*|\/\*[\s\S]*?\*\/)/g, m => hold("com", m));
+  // SQL keywords
+  s = s.replace(/\b(SELECT|FROM|WHERE|AND|OR|NOT|IN|BETWEEN|LIKE|IS|NULL|ORDER|BY|GROUP|HAVING|LIMIT|OFFSET|JOIN|INNER|LEFT|RIGHT|FULL|OUTER|CROSS|ON|AS|DISTINCT|UNION|INSERT|INTO|VALUES|UPDATE|SET|DELETE|CREATE|TABLE|INDEX|UNIQUE|VIEW|DROP|ALTER|PRIMARY|KEY|FOREIGN|REFERENCES|CASCADE|DEFAULT|CHECK|CONSTRAINT|BEGIN|COMMIT|ROLLBACK|TRANSACTION|WITH|CASE|WHEN|THEN|END|EXISTS|IF|TRUE|FALSE|ASC|DESC|COUNT|SUM|AVG|MIN|MAX|NOW)\b/gi, '<span class="kw">$1</span>');
+  // Numbers
   s = s.replace(/\b(\d+(?:\.\d+)?)\b/g, '<span class="num">$1</span>');
-  s = s.replace(/\b([a-z_][a-z0-9_]*)\s*\(/gi, '<span class="fn">$1</span>(');
-  s = s.replace(/(?:&lt;\?php|\?&gt;)/g, '<span class="kw">$&</span>');
-  s = s.replace(/(-&gt;|=&gt;|::)/g, '<span class="op">$&</span>');
   return s.replace(/__SAWAHOLD(\d+)HOLD__/g, (_, i) => stash[+i] ?? "");
 }
 
