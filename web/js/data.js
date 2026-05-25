@@ -535,6 +535,135 @@ const GIO = [
     ]}],
     quiz:[{q:"Pour interdire les doublons sur une colonne :",opts:["<code>NOT NULL</code>","<code>UNIQUE</code>","<code>PRIMARY KEY</code>","Index"],correct:"b",
       expl:"<code>UNIQUE</code> interdit les doublons. <code>PRIMARY KEY</code> = UNIQUE + NOT NULL."}]
+  },
+  {id:"w3-operators",code:"B7",level:"basic",title:"SQL Operators",sub:"Arithmetic, comparison, logical",tags:["operators","basics"],
+    sections:[{h:"Toutes categories",blocks:[
+      {table:[
+        ["Categorie","Operateurs"],
+        ["Arithmetique","<code>+ - * / %</code>"],
+        ["Comparison","<code>= &lt;&gt; != &lt; &gt; &lt;= &gt;=</code>"],
+        ["Logique","<code>AND OR NOT</code>"],
+        ["Plage","<code>BETWEEN ... AND</code>"],
+        ["Liste","<code>IN, NOT IN</code>"],
+        ["Pattern","<code>LIKE, NOT LIKE, ILIKE</code> (PG)"],
+        ["NULL","<code>IS NULL, IS NOT NULL</code>"],
+        ["Existence","<code>EXISTS, NOT EXISTS</code>"],
+        ["Quantif.","<code>ANY, ALL, SOME</code>"]
+      ]},
+      {code:"-- Operateurs en pratique\nSELECT * FROM users WHERE age BETWEEN 18 AND 65;\nSELECT * FROM users WHERE country IN ('FR', 'BE', 'CH');\nSELECT * FROM products WHERE price >= ALL (SELECT price FROM products WHERE category = 'premium');\nSELECT * FROM orders WHERE EXISTS (SELECT 1 FROM users WHERE users.id = orders.user_id);"}
+    ]}],
+    quiz:[{q:"<code>!=</code> et <code>&lt;&gt;</code> :",opts:["Differents","Identiques","!= est faux","&lt;&gt; est SQL"],correct:"b",
+      expl:"Tous les deux = 'different'. &lt;&gt; est le standard SQL, != est tolere."}]
+  },
+  {id:"w3-null",code:"B8",level:"basic",title:"SQL NULL Values",sub:"IS NULL, COALESCE, NULLIF",tags:["NULL","basics"],
+    sections:[{h:"NULL : un etat special",blocks:[
+      {p:"<code>NULL</code> = 'on ne sait pas'. PAS la meme chose que 0 ou ''."},
+      {code:"-- Tester null\nSELECT * FROM users WHERE email IS NULL;\nSELECT * FROM users WHERE email IS NOT NULL;\n\n-- COALESCE : prend la premiere non-null\nSELECT name, COALESCE(email, phone, 'Pas de contact') AS contact\nFROM users;\n\n-- IFNULL (MySQL) / NVL (Oracle)\nSELECT IFNULL(email, 'inconnu') FROM users;\n\n-- NULLIF : retourne NULL si les 2 sont egaux, sinon le premier\nSELECT NULLIF(price, 0) FROM products;  -- 0 -> NULL\n\n-- NULL dans aggregations : IGNORE\nSELECT COUNT(*) FROM users;        -- compte toutes les lignes\nSELECT COUNT(email) FROM users;    -- compte non-null seulement"},
+      {warn:"<code>NULL = NULL</code> retourne NULL (pas true) ! Toujours utiliser <code>IS NULL</code>."}
+    ]}],
+    quiz:[{q:"<code>NULL = NULL</code> retourne :",opts:["true","false","NULL","Erreur"],correct:"c",
+      expl:"NULL n'est jamais egal a NULL. Utilise IS NULL."}]
+  },
+  {id:"w3-wildcards",code:"B9",level:"basic",title:"SQL Wildcards",sub:"LIKE patterns",tags:["wildcards","LIKE","basics"],
+    sections:[{h:"Pattern matching",blocks:[
+      {table:[
+        ["Wildcard","Sens","Exemple match"],
+        ["<code>%</code>","0 ou + caracteres","'a%' matches 'apple', 'a'"],
+        ["<code>_</code>","Exactement 1 char","'_at' matches 'cat', 'bat'"],
+        ["<code>[charlist]</code>","SQL Server","'[abc]%' = a, b ou c"],
+        ["<code>[!charlist]</code>","SQL Server NOT","'[!abc]%'"],
+        ["<code>[a-d]</code>","SQL Server range","de a a d"]
+      ]},
+      {code:"-- Examples\nSELECT * FROM users WHERE name LIKE 'A%';        -- commence par A\nSELECT * FROM users WHERE name LIKE '%son';       -- finit par son\nSELECT * FROM users WHERE name LIKE '%mar%';      -- contient mar\nSELECT * FROM users WHERE name LIKE '_a%';        -- 2eme lettre = a\nSELECT * FROM products WHERE name LIKE 'Phone__'; -- 'Phone' + 2 chars\n\n-- Insensitive case (PostgreSQL)\nSELECT * FROM users WHERE name ILIKE 'mar%';\n\n-- Escape un wildcard\nSELECT * FROM products WHERE name LIKE '50%%' ESCAPE '\\\\';"}
+    ]}],
+    quiz:[{q:"<code>'__t'</code> matche :",opts:["any 3 chars endant par t","Que 'at'","Erreur","'t' seul"],correct:"a",
+      expl:"<code>_</code> = exactement 1 char. <code>__t</code> = 3 chars dont le dernier est t."}]
+  },
+  {id:"w3-functions",code:"I7",level:"intermediate",title:"SQL Functions",sub:"String, numeric, date functions",tags:["functions","intermediate"],
+    sections:[{h:"Fonctions string",blocks:[
+      {code:"SELECT UPPER(name) FROM users;             -- majuscules\nSELECT LOWER(email) FROM users;\nSELECT LENGTH(name) FROM users;            -- nb chars\nSELECT TRIM(name) FROM users;              -- enleve espaces\nSELECT LTRIM(name), RTRIM(name);\nSELECT SUBSTRING(name, 1, 3) FROM users;   -- premiers 3 chars\nSELECT CONCAT(first, ' ', last) FROM users;\nSELECT REPLACE(email, '@old', '@new');\nSELECT POSITION('a' IN name);              -- position du 'a'\nSELECT LEFT(name, 3), RIGHT(name, 3);"},
+      {code:"-- Fonctions numeriques\nSELECT ROUND(price, 2) FROM products;\nSELECT CEIL(3.2), FLOOR(3.8);\nSELECT ABS(-5);                    -- 5\nSELECT MOD(10, 3);                  -- 1\nSELECT POWER(2, 10);                -- 1024\nSELECT SQRT(16);                    -- 4\nSELECT RANDOM();                    -- 0 a 1"},
+      {code:"-- Fonctions date (PostgreSQL / MySQL syntax mixed)\nSELECT NOW();                      -- timestamp courant\nSELECT CURRENT_DATE;\nSELECT CURRENT_TIME;\nSELECT EXTRACT(YEAR FROM created_at);\nSELECT EXTRACT(MONTH FROM created_at);\nSELECT DATE_ADD(NOW(), INTERVAL 7 DAY);    -- MySQL\nSELECT NOW() + INTERVAL '7 days';           -- PostgreSQL\nSELECT DATEDIFF(end_date, start_date);"}
+    ]}],
+    quiz:[{q:"Pour avoir le nom en majuscules :",opts:["<code>CAPS</code>","<code>UPPER</code>","<code>STRTOUPPER</code>","<code>BIG</code>"],correct:"b",
+      expl:"<code>UPPER(col)</code>."}]
+  },
+  {id:"w3-union",code:"I8",level:"intermediate",title:"SQL UNION",sub:"Combiner resultats",tags:["UNION","intermediate"],
+    sections:[{h:"UNION",blocks:[
+      {p:"Combine les resultats de plusieurs SELECT. Doivent avoir le MEME nombre de colonnes, types compatibles."},
+      {code:"-- UNION : enleve les doublons\nSELECT name, 'employee' AS type FROM employees\nUNION\nSELECT name, 'customer' AS type FROM customers;\n\n-- UNION ALL : garde les doublons (plus rapide)\nSELECT product FROM orders_2025\nUNION ALL\nSELECT product FROM orders_2026;\n\n-- Avec ORDER BY (a la fin)\nSELECT name, age FROM users WHERE country = 'FR'\nUNION\nSELECT name, age FROM users WHERE country = 'BE'\nORDER BY age DESC;"},
+      {note:"<code>UNION ALL</code> garde les doublons donc plus rapide (pas de dedup). A utiliser si tu sais qu'il n'y en aura pas ou s'ils sont OK."}
+    ]}],
+    quiz:[{q:"UNION vs UNION ALL :",opts:["Identique","UNION dedup, ALL non","Inverse","UNION plus rapide"],correct:"b",
+      expl:"UNION fait un DISTINCT implicite. UNION ALL garde tout (plus rapide)."}]
+  },
+  {id:"w3-case",code:"I9",level:"intermediate",title:"SQL CASE",sub:"if/else en SQL",tags:["CASE","intermediate"],
+    sections:[{h:"CASE expression",blocks:[
+      {code:"-- CASE en SELECT (calculer une colonne)\nSELECT\n  name,\n  age,\n  CASE\n    WHEN age < 18 THEN 'Mineur'\n    WHEN age < 65 THEN 'Adulte'\n    ELSE 'Senior'\n  END AS categorie\nFROM users;\n\n-- CASE en ORDER BY (tri custom)\nSELECT * FROM tickets\nORDER BY\n  CASE priority\n    WHEN 'high' THEN 1\n    WHEN 'medium' THEN 2\n    WHEN 'low' THEN 3\n  END;\n\n-- CASE en UPDATE\nUPDATE products\nSET discount = CASE\n  WHEN price > 100 THEN 15\n  WHEN price > 50 THEN 10\n  ELSE 5\nEND;"}
+    ]}],
+    quiz:[{q:"Fin d'un CASE :",opts:["<code>ENDIF</code>","<code>ENDCASE</code>","<code>END</code>","<code>FI</code>"],correct:"c",
+      expl:"<code>CASE ... END</code>."}]
+  },
+  {id:"w3-data-types",code:"I10",level:"intermediate",title:"SQL Data Types",sub:"VARCHAR, INT, DATE, JSON...",tags:["types","intermediate"],
+    sections:[{h:"Types principaux",blocks:[
+      {table:[
+        ["Categorie","Types"],
+        ["Texte court","<code>VARCHAR(N), CHAR(N)</code>"],
+        ["Texte long","<code>TEXT, MEDIUMTEXT, LONGTEXT</code>"],
+        ["Entiers","<code>TINYINT, SMALLINT, INT, BIGINT</code>"],
+        ["Decimaux","<code>DECIMAL(p,s), FLOAT, DOUBLE</code>"],
+        ["Boolean","<code>BOOLEAN, BIT</code>"],
+        ["Date","<code>DATE, TIME, DATETIME, TIMESTAMP</code>"],
+        ["Binaire","<code>BLOB, BYTEA</code>"],
+        ["JSON","<code>JSON, JSONB</code> (PG)"],
+        ["Auto-incr","<code>SERIAL</code> (PG), <code>AUTO_INCREMENT</code> (MySQL)"]
+      ]},
+      {code:"CREATE TABLE products (\n  id SERIAL PRIMARY KEY,\n  name VARCHAR(255) NOT NULL,\n  description TEXT,\n  price DECIMAL(10, 2) NOT NULL,\n  in_stock BOOLEAN DEFAULT TRUE,\n  created_at TIMESTAMP DEFAULT NOW(),\n  metadata JSONB\n);"},
+      {warn:"<code>DECIMAL</code> pour l'argent (pas <code>FLOAT</code> ! Erreurs d'arrondi)."}
+    ]}],
+    quiz:[{q:"Pour stocker un prix :",opts:["FLOAT","DOUBLE","DECIMAL(10,2)","VARCHAR"],correct:"c",
+      expl:"DECIMAL = precision exacte. FLOAT/DOUBLE = approximations."}]
+  },
+  {id:"w3-alter",code:"A5",level:"advanced",title:"SQL ALTER TABLE",sub:"Modifier le schema",tags:["ALTER","schema","advanced"],
+    sections:[{h:"Modifier une table",blocks:[
+      {code:"-- Ajouter une colonne\nALTER TABLE users ADD COLUMN phone VARCHAR(20);\n\n-- Avec defaut + NOT NULL (utile pour grosses tables)\nALTER TABLE users ADD COLUMN active BOOLEAN NOT NULL DEFAULT TRUE;\n\n-- Renommer\nALTER TABLE users RENAME COLUMN phone TO mobile;\nALTER TABLE users RENAME TO members;\n\n-- Changer le type\nALTER TABLE users ALTER COLUMN email TYPE VARCHAR(255);     -- PostgreSQL\nALTER TABLE users MODIFY email VARCHAR(255);                 -- MySQL\n\n-- Supprimer une colonne\nALTER TABLE users DROP COLUMN bio;\n\n-- Ajouter une contrainte\nALTER TABLE users ADD CONSTRAINT uniq_email UNIQUE (email);\n\n-- Supprimer une contrainte\nALTER TABLE users DROP CONSTRAINT uniq_email;"},
+      {warn:"En prod, ajouter une colonne NOT NULL sans DEFAULT sur une table existante peut lock la table. Toujours mettre DEFAULT pour migrations zero-downtime."}
+    ]}],
+    quiz:[{q:"Ajouter une colonne :",opts:["<code>UPDATE TABLE</code>","<code>ALTER TABLE ADD COLUMN</code>","<code>INSERT COLUMN</code>","<code>CREATE COLUMN</code>"],correct:"b",
+      expl:"<code>ALTER TABLE ... ADD COLUMN ...</code>."}]
+  },
+  {id:"w3-auto-incr",code:"A6",level:"advanced",title:"SQL Auto Increment",sub:"SERIAL, AUTO_INCREMENT, IDENTITY",tags:["auto-incr","advanced"],
+    sections:[{h:"Cle auto-incrementee",blocks:[
+      {code:"-- PostgreSQL\nCREATE TABLE users (\n  id SERIAL PRIMARY KEY,    -- INT 1, 2, 3...\n  name VARCHAR(100)\n);\n-- ou GENERATED (SQL standard, PG 10+)\nCREATE TABLE users (\n  id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,\n  name VARCHAR(100)\n);\n\n-- MySQL\nCREATE TABLE users (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  name VARCHAR(100)\n);\n-- Reset le compteur\nALTER TABLE users AUTO_INCREMENT = 1000;\n\n-- SQL Server\nCREATE TABLE users (\n  id INT IDENTITY(1, 1) PRIMARY KEY,\n  name VARCHAR(100)\n);\n\n-- INSERT sans specifier l'id\nINSERT INTO users (name) VALUES ('Alice');\n-- id auto-attribue"},
+      {tip:"En 2026, prefere <code>UUID</code> pour les apps distribuees (pas de collision entre instances)."}
+    ]}],
+    quiz:[{q:"PostgreSQL auto-incr :",opts:["AUTO_INCREMENT","SERIAL","IDENTITY","INC"],correct:"b",
+      expl:"SERIAL en PostgreSQL (alias pour INT + sequence)."}]
+  },
+  {id:"w3-dates",code:"A7",level:"advanced",title:"SQL Dates",sub:"DATE, TIMESTAMP, INTERVAL",tags:["dates","advanced"],
+    sections:[{h:"Travailler avec les dates",blocks:[
+      {code:"-- Get dates\nSELECT NOW();                       -- timestamp courant\nSELECT CURRENT_DATE;                 -- juste date\nSELECT CURRENT_TIME;\n\n-- Extraire des parts\nSELECT EXTRACT(YEAR FROM created_at) FROM orders;\nSELECT EXTRACT(MONTH FROM created_at);\nSELECT EXTRACT(DOW FROM created_at);  -- day of week\n\n-- Calculs (PostgreSQL)\nSELECT NOW() + INTERVAL '7 days';\nSELECT NOW() - INTERVAL '1 month';\nSELECT NOW() - created_at AS age_de_commande;\n\n-- MySQL\nSELECT DATE_ADD(NOW(), INTERVAL 7 DAY);\nSELECT DATEDIFF(end_date, start_date);\n\n-- Format (MySQL)\nSELECT DATE_FORMAT(NOW(), '%Y-%m-%d');\nSELECT DATE_FORMAT(NOW(), '%d/%m/%Y %H:%i');\n\n-- Format (PostgreSQL)\nSELECT TO_CHAR(NOW(), 'YYYY-MM-DD');\nSELECT TO_CHAR(NOW(), 'DD/MM/YYYY HH24:MI');\n\n-- Truncate (PostgreSQL)\nSELECT DATE_TRUNC('month', created_at);   -- 1er du mois\nSELECT DATE_TRUNC('day', created_at);"},
+      {warn:"Toujours stocker les dates en UTC en base. Convertir au timezone user en affichage."}
+    ]}],
+    quiz:[{q:"Difference entre 2 dates en PG :",opts:["DATEDIFF","date1 - date2","DIFF_DATES","SUB"],correct:"b",
+      expl:"PostgreSQL : <code>date1 - date2</code> retourne un INTERVAL."}]
+  },
+  {id:"w3-injection",code:"A8",level:"advanced",title:"SQL Injection (prevention)",sub:"Prepared statements",tags:["security","injection","advanced"],
+    sections:[{h:"Le danger",blocks:[
+      {p:"<strong>SQL injection</strong> = mettre du SQL malicieux dans un champ user pour acceder/detruire la base."},
+      {code:"-- ❌ DANGEREUX (concatenation directe)\nconst userInput = \"' OR '1'='1\";\nconst sql = `SELECT * FROM users WHERE email = '${userInput}'`;\n-- devient : SELECT * FROM users WHERE email = '' OR '1'='1'\n-- = TOUS les users\n\n-- ✅ SAFE (prepared statement)\n// PHP PDO\n$stmt = $pdo->prepare('SELECT * FROM users WHERE email = ?');\n$stmt->execute([$email]);\n\n// Node.js (pg)\nawait client.query('SELECT * FROM users WHERE email = $1', [email]);\n\n// Python (psycopg)\ncur.execute('SELECT * FROM users WHERE email = %s', (email,));\n\n// Named parameters\n$stmt = $pdo->prepare('SELECT * FROM users WHERE email = :email');\n$stmt->execute(['email' => $email]);"},
+      {tip:"REGLE : JAMAIS de concatenation de string user dans une requete. TOUJOURS des prepared statements."}
+    ]}],
+    quiz:[{q:"Pour eviter SQL injection :",opts:["Escape la string","Prepared statements","Trim les espaces","Length check"],correct:"b",
+      expl:"Prepared statements = le serveur SQL traite la value comme donnee, pas comme code."}]
+  },
+  {id:"w3-comments",code:"B10",level:"basic",title:"SQL Comments",sub:"-- et /* */",tags:["comments","basics"],
+    sections:[{h:"Commentaires SQL",blocks:[
+      {code:"-- Commentaire sur une ligne (standard)\nSELECT * FROM users;\n\n# Commentaire MySQL (non standard)\n\n/* Commentaire\n   multi-lignes */\nSELECT * FROM users; /* inline aussi */\n\n-- Ignorer une partie d'une requete temporairement\nSELECT id, name --, email\nFROM users\n-- WHERE active = TRUE\n;"},
+      {tip:"<code>--</code> est universel SQL. Prefere-le a <code>#</code> (MySQL only)."}
+    ]}],
+    quiz:[{q:"Commentaire ligne SQL :",opts:["//","--","#","/*"],correct:"b",
+      expl:"<code>--</code> est le standard."}]
   }
 ];
 
