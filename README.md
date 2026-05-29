@@ -6,7 +6,7 @@
 
 [![Made by Chadi Khoder](https://img.shields.io/badge/made_by-Chadi_Khoder-14b8a6?style=for-the-badge)](https://github.com/chadikoder)
 [![No build](https://img.shields.io/badge/no_build-static-14b8a6?style=for-the-badge)](https://github.com/chadikoder/SQL)
-[![License MIT](https://img.shields.io/badge/license-MIT-14b8a6?style=for-the-badge)](#license)
+[![License](https://img.shields.io/badge/license-PolyForm_NC-14b8a6?style=for-the-badge)](#license)
 
 [**Open the tracker →**](https://chadikoder.github.io/SQL/)
 
@@ -111,4 +111,6 @@ By the same author, same design system:
 
 ## License
 
-MIT — use it, fork it, share it with your students.
+**PolyForm Noncommercial License 1.0.0** — Copyright © 2026 Chadi Ikhoder. All rights reserved.
+
+You may read, study, and use this for personal, educational, and non-commercial purposes. You may **not** sell it or use it for any commercial purpose. See [`LICENSE`](./LICENSE) for the full text.
