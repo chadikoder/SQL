@@ -977,7 +977,6 @@ body.drawer-open{overflow:hidden}
 .pomo-sound.off{opacity:.5}
 @media(max-width:640px){.pomo-panel{right:8px;left:8px;width:auto;top:58px}}
 
-
 /* ===== SQL tracker accent (ported engine, identity preserved) ===== */
 :root{--accent:#2dd4bf;--accent-2:#14b8a6;--accent-r:45;--accent-g:212;--accent-b:191;--grad:linear-gradient(135deg,#2dd4bf,#14b8a6)}
 [data-theme="light"]{--accent:#0d9488;--accent-2:#0f766e;--accent-r:13;--accent-g:148;--accent-b:136}

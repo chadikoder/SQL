@@ -222,7 +222,7 @@ function loadState() {
 }
 
 function defaultState() {
-  return { completed: {}, exDone: {}, bookmarks: {}, lastActive: null, theme: "dark", lang: "fr", sectionsCollapsed: {}, achSeen: null, dailyGoal: 10, confidence: {}, masteredSeen: {}, goalReachedDate: null, pomo: null };
+  return { completed: {}, exDone: {}, bookmarks: {}, lastActive: null, theme: "dark", lang: "fr", sectionsCollapsed: {}, achSeen: null, dailyGoal: 10, confidence: {}, masteredSeen: {}, goalReachedDate: null, pomo: null, quizAnswers: {} };
 }
 
 function saveState() {
@@ -545,7 +545,7 @@ function renderExArea(lesson) {
     <div class="tab-content ${currentTab === "cours" ? "active" : ""}" id="tab-cours">
       <div class="lesson-body">
         ${(lesson.sections || []).map(renderSection).join("")}
-        ${lesson.quiz && lesson.quiz.length ? renderQuiz(lesson.quiz) : ""}
+        ${lesson.quiz && lesson.quiz.length ? renderQuiz(lesson.quiz, lesson.id) : ""}
       </div>
     </div>
     ${hasEx ? `
@@ -585,6 +585,7 @@ function renderExArea(lesson) {
       const card = opt.closest(".quiz-card");
       if (card.dataset.answered) return;
       card.dataset.answered = "1";
+      card.classList.add("answered");
       const correct = card.dataset.correct;
       card.querySelectorAll(".quiz-opt").forEach(o => {
         o.classList.add("disabled");
@@ -598,6 +599,12 @@ function renderExArea(lesson) {
       });
       const expl = card.querySelector(".quiz-expl");
       if (expl) expl.classList.add("shown");
+      // Persist so the answer survives navigation / reload
+      if (card.dataset.qkey) {
+        if (!state.quizAnswers) state.quizAnswers = {};
+        state.quizAnswers[card.dataset.qkey] = opt.dataset.letter;
+        saveState();
+      }
     });
   });
 
@@ -732,16 +739,27 @@ function renderBlock(b) {
   return "";
 }
 
-function renderQuiz(quiz) {
+function renderQuiz(quiz, lessonId) {
+  const answers = state.quizAnswers || {};
   const cards = quiz.map((q, i) => {
+    const key = lessonId + "-q" + i;
+    const chosen = answers[key];           // letter the user picked, or undefined
+    const answered = chosen != null;
     const letters = q.opts.map((_, j) => String.fromCharCode(97 + j));
-    const opts = q.opts.map((o, j) =>
-      `<button class="quiz-opt" data-letter="${letters[j]}">${t(o)}</button>`
-    ).join("");
-    return `<div class="quiz-card" data-correct="${q.correct}">
+    const opts = q.opts.map((o, j) => {
+      const letter = letters[j];
+      let cls = "quiz-opt", ico = "";
+      if (answered) {
+        cls += " disabled";
+        if (letter === q.correct) { cls += " correct"; ico = ' <span class="quiz-ico">&#10003;</span>'; }
+        else if (letter === chosen) { cls += " wrong"; ico = ' <span class="quiz-ico">&#10007;</span>'; }
+      }
+      return `<button class="${cls}" data-letter="${letter}">${t(o)}${ico}</button>`;
+    }).join("");
+    return `<div class="quiz-card${answered ? " answered" : ""}" data-correct="${q.correct}" data-qkey="${key}"${answered ? ' data-answered="1"' : ""}>
       <div class="quiz-q"><span class="num">Q${i + 1}.</span> ${t(q.q)}</div>
       <div class="quiz-opts">${opts}</div>
-      ${q.expl ? `<div class="quiz-expl">${t(q.expl)}</div>` : ""}
+      ${q.expl ? `<div class="quiz-expl${answered ? " shown" : ""}">${t(q.expl)}</div>` : ""}
     </div>`;
   }).join("");
   return `<div class="quiz-section">
