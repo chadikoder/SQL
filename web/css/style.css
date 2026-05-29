@@ -20,9 +20,9 @@
   --text-3:    #64748b;
 
   /* Accent — single tone, less neon */
-  --accent:    #2dd4bf;
-  --accent-2:  #14b8a6;
-  --accent-r:  45; --accent-g:212; --accent-b:191;
+  --accent:    #818cf8;
+  --accent-2:  #6366f1;
+  --accent-r:  129; --accent-g:140; --accent-b:248;
 
   /* Semantic */
   --good:      #34d399;
@@ -31,7 +31,7 @@
   --info:      #60a5fa;
 
   /* Effects — softer, more enterprise */
-  --grad:      linear-gradient(135deg,#2dd4bf,#14b8a6);
+  --grad:      linear-gradient(135deg,#818cf8,#6366f1);
   --grad-good: linear-gradient(135deg,#34d399,#10b981);
   --shadow-sm: 0 1px 2px rgba(0,0,0,.25);
   --shadow:    0 6px 18px -6px rgba(0,0,0,.45);
@@ -61,8 +61,8 @@
   --text-2:    #475569;
   --text-3:    #94a3b8;
 
-  --accent:    #0d9488;
-  --accent-2:  #0f766e;
+  --accent:    #4f46e5;
+  --accent-2:  #4338ca;
   --accent-r:  79; --accent-g:70; --accent-b:229;
 
   --shadow-sm: 0 1px 2px rgba(15,23,42,.06);
@@ -940,3 +940,44 @@ body.drawer-open{overflow:hidden}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
 }
+
+/* ---------- POMODORO ---------- */
+.pomo-trigger{width:auto;display:inline-flex;align-items:center;gap:5px;padding:0 11px}
+.pomo-trigger .pomo-ico{font-size:15px;line-height:1}
+.pomo-trigger .pomo-time{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--accent)}
+.pomo-trigger .pomo-time:empty{display:none}
+.pomo-trigger.running{border-color:var(--accent);background:rgba(var(--accent-r),var(--accent-g),var(--accent-b),.12)}
+.pomo-panel{
+  position:fixed;top:62px;right:14px;z-index:160;width:250px;
+  background:var(--surface);border:1px solid var(--border-2);border-radius:var(--r);
+  box-shadow:var(--shadow-lg);padding:18px;
+  opacity:0;transform:translateY(-8px) scale(.97);pointer-events:none;
+  transition:opacity .18s var(--ease),transform .18s var(--ease-out);
+}
+.pomo-panel.open{opacity:1;transform:none;pointer-events:auto}
+.pomo-phase{text-align:center;font-size:11.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
+.pomo-panel.phase-break .pomo-phase{color:var(--good)}
+.pomo-display{text-align:center;font-family:'JetBrains Mono',monospace;font-size:46px;font-weight:800;letter-spacing:1px;color:var(--text);font-variant-numeric:tabular-nums;line-height:1.05}
+.pomo-bar{height:6px;border-radius:99px;background:var(--surface-3);overflow:hidden;margin:14px 0}
+.pomo-bar-fill{display:block;height:100%;width:0;background:var(--grad);border-radius:99px;transition:width .5s linear}
+.pomo-panel.phase-break .pomo-bar-fill{background:var(--grad-good)}
+.pomo-controls{display:flex;align-items:center;gap:8px}
+.pomo-btn-main{flex:1;padding:11px;border-radius:9px;background:var(--grad);color:#fff;font-weight:700;font-size:13px;border:none;box-shadow:0 4px 12px -3px rgba(var(--accent-r),var(--accent-g),var(--accent-b),.5);transition:transform .12s var(--ease)}
+.pomo-btn-main:hover{transform:translateY(-1px)}
+.pomo-btn-mini{width:40px;height:40px;border-radius:9px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-2);font-size:15px;transition:all .12s var(--ease)}
+.pomo-btn-mini:hover{color:var(--text);border-color:var(--accent)}
+.pomo-meta{text-align:center;font-size:12px;color:var(--text-3);margin-top:13px}
+.pomo-meta b{color:var(--accent);font-weight:800;font-variant-numeric:tabular-nums}
+.pomo-settings{display:flex;align-items:flex-end;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+.pomo-settings label{flex:1;display:flex;flex-direction:column;gap:4px;font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em}
+.pomo-settings input{width:100%;padding:6px 8px;border-radius:7px;background:var(--surface-2);border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;text-align:center;outline:none}
+.pomo-settings input:focus{border-color:var(--accent);box-shadow:var(--ring)}
+.pomo-sound{width:38px;height:34px;border-radius:7px;background:var(--surface-2);border:1px solid var(--border);font-size:14px;transition:all .12s var(--ease)}
+.pomo-sound:hover{border-color:var(--accent)}
+.pomo-sound.off{opacity:.5}
+@media(max-width:640px){.pomo-panel{right:8px;left:8px;width:auto;top:58px}}
+
+
+/* ===== SQL tracker accent (ported engine, identity preserved) ===== */
+:root{--accent:#2dd4bf;--accent-2:#14b8a6;--accent-r:45;--accent-g:212;--accent-b:191;--grad:linear-gradient(135deg,#2dd4bf,#14b8a6)}
+[data-theme="light"]{--accent:#0d9488;--accent-2:#0f766e;--accent-r:13;--accent-g:148;--accent-b:136}

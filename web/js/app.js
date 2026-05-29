@@ -161,6 +161,21 @@ const T_DICT = {
   confLabel:     { fr: "Niveau de confiance",  en: "Confidence" },
   filterWeak:    { fr: "🚦 À revoir",          en: "🚦 To review" },
   noWeak:        { fr: "Rien à revoir ici — bien joué !", en: "Nothing to review here — nice!" },
+  // Pomodoro
+  pomodoro:      { fr: "Pomodoro",             en: "Pomodoro" },
+  pomoFocus:     { fr: "Concentration",        en: "Focus" },
+  pomoShort:     { fr: "Pause",                en: "Break" },
+  pomoLong:      { fr: "Pause longue",         en: "Long break" },
+  pomoStart:     { fr: "Démarrer",             en: "Start" },
+  pomoPause:     { fr: "Pause",                en: "Pause" },
+  pomoDone:      { fr: "pomodoros aujourd'hui",en: "pomodoros today" },
+  pomoFocusMin:  { fr: "Focus (min)",          en: "Focus (min)" },
+  pomoBreakMin:  { fr: "Pause (min)",          en: "Break (min)" },
+  pomoSkip:      { fr: "Passer la phase",      en: "Skip phase" },
+  pomoResetT:    { fr: "Réinitialiser",        en: "Reset" },
+  pomoSound:     { fr: "Activer / couper le son", en: "Toggle sound" },
+  pomoFocusDone: { fr: "Concentration terminée — fais une pause ! 🍵", en: "Focus done — take a break! 🍵" },
+  pomoBreakDone: { fr: "Pause terminée — au travail ! 💪", en: "Break over — back to work! 💪" },
 };
 const T = new Proxy(T_DICT, { get(o, k) { return t(o[k]); } });
 
@@ -207,7 +222,7 @@ function loadState() {
 }
 
 function defaultState() {
-  return { completed: {}, exDone: {}, bookmarks: {}, lastActive: null, theme: "dark", lang: "fr", sectionsCollapsed: {}, achSeen: null, dailyGoal: 10, confidence: {}, masteredSeen: {}, goalReachedDate: null };
+  return { completed: {}, exDone: {}, bookmarks: {}, lastActive: null, theme: "dark", lang: "fr", sectionsCollapsed: {}, achSeen: null, dailyGoal: 10, confidence: {}, masteredSeen: {}, goalReachedDate: null, pomo: null };
 }
 
 function saveState() {
@@ -1079,6 +1094,10 @@ function applyI18n() {
     const k = el.dataset.i18nPlaceholder;
     if (T_DICT[k]) el.setAttribute("placeholder", t(T_DICT[k]));
   });
+  document.querySelectorAll("[data-i18n-title]").forEach(el => {
+    const k = el.dataset.i18nTitle;
+    if (T_DICT[k]) el.setAttribute("title", t(T_DICT[k]));
+  });
 }
 if (langBtn) {
   langBtn.addEventListener("click", () => {
@@ -1145,30 +1164,18 @@ function renderWelcome() {
   const main = document.getElementById("main");
   if (!main) return;
   document.documentElement.classList.remove("has-active");
-  // Data-driven so the same engine renders the correct curriculum for any tracker.
-  const exWord = state.lang === "en" ? "exos" : "exos";
-  const lessonWord = state.lang === "en" ? "lessons" : "leçons";
-  const lastDayId = DAYS.length ? DAYS[DAYS.length - 1].id : null;
-  const dayCards = DAYS.map((d, i) => {
-    const exTotal = d.exercises ? d.exercises.length : 0;
-    const topic = t(d.title).replace(/^(Jour|Day)\s*\d+\s*[-–]\s*/, "");
-    return {
-      id: d.id,
-      big: `${d.id === lastDayId ? "🏁" : "📘"} ${t(T_DICT.day)} ${i + 1}`,
-      sub: exTotal ? `${topic} · ${exTotal} ${exWord}` : topic,
-    };
-  });
-  const levelDefs = [
-    { key: "basic",        emoji: "🟢", label: { fr: "Basic",        en: "Basic" } },
-    { key: "intermediate", emoji: "🟡", label: { fr: "Intermediate", en: "Intermediate" } },
-    { key: "advanced",     emoji: "🔴", label: { fr: "Advanced",     en: "Advanced" } },
+  const cards = [
+    { id: "day-1", big: `📘 ${t(T_DICT.day)} 1`, sub: { fr: "PHP Basics · 20 exos", en: "PHP Basics · 20 exos" } },
+    { id: "day-2", big: `📘 ${t(T_DICT.day)} 2`, sub: { fr: "Fonctions / Arrays · 20 exos", en: "Functions / Arrays · 20 exos" } },
+    { id: "day-3", big: `📘 ${t(T_DICT.day)} 3`, sub: { fr: "Formulaires · 20 exos", en: "Forms · 20 exos" } },
+    { id: "day-4", big: `📘 ${t(T_DICT.day)} 4`, sub: { fr: "Sessions / Auth · 20 exos", en: "Sessions / Auth · 20 exos" } },
+    { id: "day-5", big: `📘 ${t(T_DICT.day)} 5`, sub: { fr: "MySQL / PDO · 20 exos", en: "MySQL / PDO · 20 exos" } },
+    { id: "day-6", big: `📘 ${t(T_DICT.day)} 6`, sub: { fr: "Uploads / CSV · 20 exos", en: "Uploads / CSV · 20 exos" } },
+    { id: "day-7", big: `🏁 ${t(T_DICT.day)} 7`, sub: { fr: "OOP + Mock exam · 20 exos", en: "OOP + Mock exam · 20 exos" } },
+    { id: "w3-intro", big: "🟢 Basic", sub: { fr: "W3Schools · 14 leçons", en: "W3Schools · 14 lessons" } },
+    { id: "w3-forms", big: "🟡 Intermediate", sub: { fr: "W3Schools · 10 leçons", en: "W3Schools · 10 lessons" } },
+    { id: "w3-oop", big: "🔴 Advanced", sub: { fr: "W3Schools · 10 leçons", en: "W3Schools · 10 lessons" } },
   ];
-  const levelCards = levelDefs.map(lv => {
-    const items = GIO.filter(l => (l.level || "basic") === lv.key);
-    if (!items.length) return null;
-    return { id: items[0].id, big: `${lv.emoji} ${t(lv.label)}`, sub: `W3Schools · ${items.length} ${lessonWord}` };
-  }).filter(Boolean);
-  const cards = [...dayCards, ...levelCards];
   const badges = computeBadges();
   const unlockedCount = badges.filter(b => b.unlocked).length;
   const badgesHtml = badges.map(b =>
@@ -1177,14 +1184,10 @@ function renderWelcome() {
       <span class="wc-badge-label">${esc(b.label)}</span>
     </div>`
   ).join("");
-  const examStr = `${String(EXAM_DATE.getDate()).padStart(2,"0")}/${String(EXAM_DATE.getMonth()+1).padStart(2,"0")}/${EXAM_DATE.getFullYear()}`;
-  const subText = state.lang === "en"
-    ? `${DAYS.length}-day plan · ${TOTAL_EXERCISES} exercises · ${GIO.length} W3Schools lessons · auto-tracked. Exam on ${examStr}.`
-    : `Plan ${DAYS.length} jours · ${TOTAL_EXERCISES} exercices · ${GIO.length} leçons W3Schools · suivi automatique. Examen le ${examStr}.`;
   main.innerHTML = `
     <div class="welcome">
       <h1>${t(T_DICT.welcomeTitle)} <span class="accent">NFA042</span></h1>
-      <p>${subText}</p>
+      <p>${t(T_DICT.welcomeSub)}</p>
       <div class="quick-grid">
         ${cards.map(c => `<button class="quick-card" data-jump="${c.id}"><div class="big">${c.big}</div><div class="sub">${t(c.sub)}</div></button>`).join("")}
       </div>
@@ -1485,6 +1488,209 @@ if (backdrop) {
 }
 
 /* ====================================================================
+   POMODORO TIMER + ALARM
+   Classic 25/5 (long break every 4). State lives in state.pomo so it
+   rides the per-tracker storage key. endTs is absolute so it survives
+   reloads. Alarm uses Web Audio (no asset) + optional Notification.
+   ==================================================================== */
+function pomoState() {
+  const def = { phase: "focus", running: false, endTs: null, leftMs: null, focusMin: 25, shortMin: 5, longMin: 15, completed: 0, cycle: 0, soundOn: true };
+  if (!state.pomo || typeof state.pomo !== "object") state.pomo = def;
+  else for (const k in def) if (!(k in state.pomo)) state.pomo[k] = def[k];
+  return state.pomo;
+}
+function pomoPhaseMin(p) { return p.phase === "focus" ? p.focusMin : p.phase === "long" ? p.longMin : p.shortMin; }
+function pomoPhaseLabel(p) { return p.phase === "focus" ? T.pomoFocus : p.phase === "long" ? T.pomoLong : T.pomoShort; }
+function pomoFmt(ms) {
+  ms = Math.max(0, ms);
+  const m = Math.floor(ms / 60000), s = Math.floor((ms % 60000) / 1000);
+  return String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+}
+function pomoRemaining() {
+  const p = pomoState();
+  if (p.running && p.endTs) return Math.max(0, p.endTs - Date.now());
+  if (p.leftMs != null) return p.leftMs;
+  return pomoPhaseMin(p) * 60000;
+}
+let pomoAudio = null;
+function pomoEnsureAudio() {
+  try {
+    pomoAudio = pomoAudio || new (window.AudioContext || window.webkitAudioContext)();
+    if (pomoAudio.state === "suspended") pomoAudio.resume();
+  } catch (e) {}
+}
+function pomoBeep(times) {
+  if (!pomoState().soundOn) return;
+  pomoEnsureAudio();
+  if (!pomoAudio) return;
+  try {
+    let t = pomoAudio.currentTime;
+    for (let i = 0; i < times; i++) {
+      const o = pomoAudio.createOscillator(), g = pomoAudio.createGain();
+      o.type = "sine";
+      o.frequency.value = i % 2 ? 660 : 880;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.32, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.34);
+      o.connect(g); g.connect(pomoAudio.destination);
+      o.start(t); o.stop(t + 0.36);
+      t += 0.42;
+    }
+  } catch (e) {}
+}
+function pomoNotify(msg) {
+  try {
+    if (window.Notification && Notification.permission === "granted") {
+      new Notification("🍅 " + T.pomodoro, { body: msg });
+    }
+  } catch (e) {}
+}
+let pomoTimer = null;
+function pomoStartTicker() {
+  if (pomoTimer) clearInterval(pomoTimer);
+  pomoTimer = setInterval(pomoTick, 500);
+}
+function pomoStopTicker() {
+  if (pomoTimer) { clearInterval(pomoTimer); pomoTimer = null; }
+}
+function pomoTick() {
+  const p = pomoState();
+  if (!p.running) return;
+  if (pomoRemaining() <= 0) { pomoComplete(); return; }
+  pomoRender();
+}
+function pomoStart() {
+  const p = pomoState();
+  const base = p.leftMs != null ? p.leftMs : pomoPhaseMin(p) * 60000;
+  p.endTs = Date.now() + base;
+  p.leftMs = null;
+  p.running = true;
+  pomoEnsureAudio();
+  saveState();
+  pomoStartTicker();
+  pomoRender();
+}
+function pomoPause() {
+  const p = pomoState();
+  p.leftMs = pomoRemaining();
+  p.running = false;
+  p.endTs = null;
+  pomoStopTicker();
+  saveState();
+  pomoRender();
+}
+function pomoToggle() { pomoState().running ? pomoPause() : pomoStart(); }
+function pomoReset() {
+  const p = pomoState();
+  p.running = false; p.endTs = null; p.leftMs = pomoPhaseMin(p) * 60000;
+  pomoStopTicker();
+  saveState();
+  pomoRender();
+}
+function pomoAdvance() {
+  const p = pomoState();
+  if (p.phase === "focus") {
+    p.completed += 1;
+    p.cycle += 1;
+    p.phase = (p.cycle % 4 === 0) ? "long" : "short";
+  } else {
+    p.phase = "focus";
+  }
+  p.running = false; p.endTs = null; p.leftMs = pomoPhaseMin(p) * 60000;
+  pomoStopTicker();
+  saveState();
+  pomoRender();
+}
+function pomoComplete() {
+  const wasFocus = pomoState().phase === "focus";
+  pomoStopTicker();
+  pomoBeep(3);
+  pomoAdvance();
+  const msg = wasFocus ? T.pomoFocusDone : T.pomoBreakDone;
+  toast(msg);
+  pomoNotify(msg);
+}
+function pomoRender() {
+  const p = pomoState();
+  const rem = pomoRemaining();
+  const disp = document.getElementById("pomo-display");
+  const phaseEl = document.getElementById("pomo-phase");
+  const toggle = document.getElementById("pomo-toggle");
+  const countEl = document.getElementById("pomo-count");
+  const timeEl = document.getElementById("pomo-time");
+  const btn = document.getElementById("pomo-btn");
+  const barFill = document.getElementById("pomo-bar-fill");
+  const panel = document.getElementById("pomo-panel");
+  if (disp) disp.textContent = pomoFmt(rem);
+  if (phaseEl) phaseEl.textContent = pomoPhaseLabel(p);
+  if (toggle) toggle.textContent = p.running ? T.pomoPause : T.pomoStart;
+  if (countEl) countEl.textContent = p.completed;
+  if (timeEl) timeEl.textContent = p.running ? pomoFmt(rem) : "";
+  if (btn) btn.classList.toggle("running", !!p.running);
+  if (panel) panel.classList.toggle("phase-break", p.phase !== "focus");
+  if (barFill) {
+    const total = pomoPhaseMin(p) * 60000 || 1;
+    barFill.style.width = Math.min(100, (1 - rem / total) * 100) + "%";
+  }
+  const fIn = document.getElementById("pomo-focus-min");
+  const sIn = document.getElementById("pomo-short-min");
+  const snd = document.getElementById("pomo-sound");
+  if (fIn && document.activeElement !== fIn) fIn.value = p.focusMin;
+  if (sIn && document.activeElement !== sIn) sIn.value = p.shortMin;
+  if (snd) { snd.textContent = p.soundOn ? "🔔" : "🔕"; snd.classList.toggle("off", !p.soundOn); }
+}
+function initPomodoro() {
+  const btn = document.getElementById("pomo-btn");
+  const panel = document.getElementById("pomo-panel");
+  if (!btn || !panel) return;
+  const p = pomoState();
+  // Resume a running timer across reloads
+  if (p.running && p.endTs) {
+    if (p.endTs > Date.now()) pomoStartTicker();
+    else pomoComplete(); // finished while the tab was closed
+  }
+  btn.addEventListener("click", e => {
+    e.stopPropagation();
+    const open = panel.classList.toggle("open");
+    panel.setAttribute("aria-hidden", open ? "false" : "true");
+    if (open && window.Notification && Notification.permission === "default") {
+      Notification.requestPermission().catch(() => {});
+    }
+    pomoRender();
+  });
+  document.getElementById("pomo-toggle").addEventListener("click", pomoToggle);
+  document.getElementById("pomo-reset").addEventListener("click", pomoReset);
+  document.getElementById("pomo-skip").addEventListener("click", pomoAdvance);
+  const fIn = document.getElementById("pomo-focus-min");
+  const sIn = document.getElementById("pomo-short-min");
+  const snd = document.getElementById("pomo-sound");
+  if (fIn) fIn.addEventListener("change", () => {
+    const v = Math.max(1, Math.min(90, parseInt(fIn.value, 10) || 25));
+    const q = pomoState(); q.focusMin = v;
+    if (!q.running && q.phase === "focus") q.leftMs = v * 60000;
+    saveState(); pomoRender();
+  });
+  if (sIn) sIn.addEventListener("change", () => {
+    const v = Math.max(1, Math.min(60, parseInt(sIn.value, 10) || 5));
+    const q = pomoState(); q.shortMin = v;
+    if (!q.running && q.phase === "short") q.leftMs = v * 60000;
+    saveState(); pomoRender();
+  });
+  if (snd) snd.addEventListener("click", () => { pomoState().soundOn = !pomoState().soundOn; saveState(); pomoRender(); });
+  document.addEventListener("click", e => {
+    if (panel.classList.contains("open") && !panel.contains(e.target) && !btn.contains(e.target)) {
+      panel.classList.remove("open"); panel.setAttribute("aria-hidden", "true");
+    }
+  });
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape" && panel.classList.contains("open")) {
+      panel.classList.remove("open"); panel.setAttribute("aria-hidden", "true");
+    }
+  });
+  pomoRender();
+}
+
+/* ====================================================================
    INIT
    ==================================================================== */
 applyTheme();
@@ -1510,6 +1716,8 @@ if (parseInt(localStorage.getItem(MOCK_EXAM_KEY) || "0", 10) > Date.now()) {
   document.body.classList.add("mock-running");
   startMockTicker();
 }
+
+initPomodoro();
 
 /* ====================================================================
    SCROLL PROGRESS BAR + JUMP TO TOP
