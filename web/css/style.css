@@ -416,6 +416,21 @@ body.drawer-open{overflow:hidden}
 .achieve-badge.unlocked:hover{transform:scale(1.22) rotate(-6deg)}
 @keyframes badgePop{0%{transform:scale(.4);opacity:0}60%{transform:scale(1.25)}100%{transform:scale(1);opacity:1}}
 
+/* Plan / Reference segmented toggle */
+.nav-mode{
+  display:flex;gap:4px;margin:10px 0 4px;padding:4px;
+  background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);
+}
+.nav-mode-btn{
+  flex:1;padding:7px 8px;border:0;border-radius:var(--r-xs);
+  background:transparent;color:var(--text-2);
+  font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;
+  transition:background .15s var(--ease),color .15s,box-shadow .15s;
+}
+.nav-mode-btn:hover{color:var(--text)}
+.nav-mode-btn.active{background:var(--grad);color:#fff;box-shadow:var(--shadow-sm)}
+.nav-track[hidden]{display:none}
+
 /* Section title */
 .section-title{
   font-size:10.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;
@@ -454,38 +469,47 @@ body.drawer-open{overflow:hidden}
   box-shadow:0 0 10px rgba(var(--accent-r),var(--accent-g),var(--accent-b),.5);
 }
 .nav-check{
-  width:22px;height:22px;border-radius:6px;
-  border:1px solid var(--border);background:var(--surface-2);
+  width:20px;height:20px;border-radius:50%;
+  border:1.5px solid var(--border);background:transparent;
   display:flex;align-items:center;justify-content:center;
-  font-size:11px;font-weight:700;flex-shrink:0;cursor:pointer;
-  transition:all .15s var(--ease);color:transparent;
+  font-size:11px;font-weight:800;line-height:1;flex-shrink:0;cursor:pointer;
+  transition:background .18s var(--ease),border-color .18s var(--ease),box-shadow .18s var(--ease),transform .12s var(--ease),color .18s var(--ease);
+  color:transparent;
 }
 .nav-check:hover{
   border-color:var(--accent);
-  background:rgba(var(--accent-r),var(--accent-g),var(--accent-b),.10);
+  background:rgba(var(--accent-r),var(--accent-g),var(--accent-b),.08);
+  box-shadow:0 0 0 3px rgba(var(--accent-r),var(--accent-g),var(--accent-b),.10);
 }
 .nav-check:focus-visible{box-shadow:var(--ring)}
-.nav-check:active{transform:scale(.92)}
-/* Done state — matches .complete-btn.done */
+.nav-check:active{transform:scale(.88)}
+/* Done state — solid green disc with white check */
 .nav-item.done .nav-check{
-  background:rgba(52,211,153,.14);
-  border-color:rgba(52,211,153,.34);
-  color:var(--good);
+  background:var(--good);
+  border-color:var(--good);
+  color:#fff;
+  box-shadow:0 0 0 2px rgba(52,211,153,.18);
+  animation:checkPop .35s var(--ease-out);
 }
 .nav-item.done .nav-check:hover{
-  background:rgba(52,211,153,.22);
-  border-color:rgba(52,211,153,.5);
+  background:#10b981;
+  border-color:#10b981;
+  box-shadow:0 0 0 3px rgba(52,211,153,.28);
 }
-/* When the lesson is the chosen/active one, the check echoes the active row tint */
+/* Active lesson echoes the accent in the empty ring */
 .nav-item.active .nav-check{
-  border-color:rgba(var(--accent-r),var(--accent-g),var(--accent-b),.4);
-  background:rgba(var(--accent-r),var(--accent-g),var(--accent-b),.06);
+  border-color:rgba(var(--accent-r),var(--accent-g),var(--accent-b),.5);
 }
 .nav-item.active.done .nav-check{
-  border-color:rgba(52,211,153,.4);
-  background:rgba(52,211,153,.18);
+  box-shadow:0 0 0 3px rgba(52,211,153,.30);
 }
 .nav-item:hover .nav-check:not(:hover){border-color:var(--border-2)}
+
+@keyframes checkPop{
+  0%{transform:scale(.35);opacity:.35}
+  55%{transform:scale(1.18);opacity:1}
+  100%{transform:scale(1);opacity:1}
+}
 .nav-tag{
   font-size:9.5px;font-weight:800;padding:2px 6px;border-radius:5px;
   background:var(--surface-3);color:var(--text-3);text-align:center;
@@ -514,6 +538,8 @@ body.drawer-open{overflow:hidden}
 
 /* ---------- 7. WELCOME ---------- */
 .welcome{max-width:780px;margin:0 auto}
+.wc-group-label{font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--text-3);margin:24px 0 10px}
+.wc-group-label:first-of-type{margin-top:10px}
 .welcome h1{
   font-size:clamp(28px,4.5vw,44px);font-weight:900;line-height:1.1;letter-spacing:-.02em;
   margin-bottom:10px;
@@ -683,16 +709,12 @@ body.drawer-open{overflow:hidden}
   font-size:13.5px;line-height:1.6;
   border-left:3px solid;
 }
-.block-note{background:rgba(var(--accent-r),var(--accent-g),var(--accent-b),.07);border-color:var(--accent);color:var(--text-2)}
-.block-warn{background:rgba(251,191,36,.08);border-color:var(--warn);color:var(--text-2)}
-.block-bad{background:rgba(248,113,113,.08);border-color:var(--bad);color:var(--text-2)}
-.block-tip{background:rgba(52,211,153,.08);border-color:var(--good);color:var(--text-2)}
-.block-try{background:rgba(251,191,36,.05);border-color:var(--warn);color:var(--text-2)}
-.block-note b{color:var(--accent)}
-.block-warn b{color:var(--warn)}
-.block-bad b{color:var(--bad)}
-.block-tip b{color:var(--good)}
-.block-try b{color:var(--warn)}
+.block-note,.block-tip{background:rgba(var(--accent-r),var(--accent-g),var(--accent-b),.07);border-color:var(--accent);color:var(--text-2)}
+.block-warn,.block-bad{background:rgba(251,191,36,.08);border-color:var(--warn);color:var(--text-2)}
+.block-try{background:rgba(96,165,250,.07);border-color:var(--info);color:var(--text-2)}
+.block-note b,.block-tip b{color:var(--accent)}
+.block-warn b,.block-bad b{color:var(--warn)}
+.block-try b{color:var(--info)}
 
 .try-btn{
   display:block;margin-top:8px;padding:5px 12px;border-radius:6px;

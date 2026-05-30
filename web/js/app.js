@@ -37,10 +37,12 @@ const T_DICT = {
   lessons:       { fr: "leçons",               en: "lessons" },
   exos:          { fr: "exos",                 en: "exos" },
   achievements:  { fr: "🏆 Succès",            en: "🏆 Achievements" },
+  modePlan:      { fr: "📅 Plan",              en: "📅 Plan" },
+  modeRef:       { fr: "📖 Référence",         en: "📖 Reference" },
   plan7:         { fr: "📘 Plan 7 jours",      en: "📘 7-day Plan" },
-  basic:         { fr: "🟢 PHP Basic",         en: "🟢 PHP Basic" },
-  intermediate:  { fr: "🟡 PHP Intermediate",  en: "🟡 PHP Intermediate" },
-  advanced:      { fr: "🔴 PHP Advanced",      en: "🔴 PHP Advanced" },
+  basic:         { fr: "🟢 SQL Basic",         en: "🟢 SQL Basic" },
+  intermediate:  { fr: "🟡 SQL Intermediate",  en: "🟡 SQL Intermediate" },
+  advanced:      { fr: "🔴 SQL Advanced",      en: "🔴 SQL Advanced" },
   resetBtn:      { fr: "🗑️ Réinitialiser la progression", en: "🗑️ Reset progress" },
   exportBtn:     { fr: "⬇️ Exporter",          en: "⬇️ Export" },
   importBtn:     { fr: "⬆️ Importer",          en: "⬆️ Import" },
@@ -222,7 +224,7 @@ function loadState() {
 }
 
 function defaultState() {
-  return { completed: {}, exDone: {}, bookmarks: {}, lastActive: null, theme: "dark", lang: "fr", sectionsCollapsed: {}, achSeen: null, dailyGoal: 10, confidence: {}, masteredSeen: {}, goalReachedDate: null, pomo: null, quizAnswers: {} };
+  return { completed: {}, exDone: {}, bookmarks: {}, lastActive: null, theme: "dark", lang: "fr", sectionsCollapsed: {}, achSeen: null, dailyGoal: 10, confidence: {}, masteredSeen: {}, goalReachedDate: null, pomo: null, quizAnswers: {}, navMode: "plan" };
 }
 
 function saveState() {
@@ -308,6 +310,7 @@ function renderSidebar() {
   document.getElementById("nav-advanced").innerHTML = adv.map(navItem).join("") || `<div class="empty-search">${T.noLesson}</div>`;
   bindNav();
   applyCollapseState();
+  applyNavMode();
   refreshProgress();
 }
 
@@ -437,6 +440,28 @@ function applyCollapseState() {
   });
 }
 
+function applyNavMode() {
+  const mode = state.navMode === "ref" ? "ref" : "plan";
+  document.querySelectorAll(".nav-track").forEach(tr => {
+    tr.hidden = tr.dataset.track !== mode;
+  });
+  document.querySelectorAll(".nav-mode-btn").forEach(btn => {
+    const on = btn.dataset.mode === mode;
+    btn.classList.toggle("active", on);
+    btn.setAttribute("aria-selected", on ? "true" : "false");
+  });
+}
+
+function setNavMode(mode) {
+  state.navMode = mode === "ref" ? "ref" : "plan";
+  saveState();
+  applyNavMode();
+}
+
+document.querySelectorAll(".nav-mode-btn").forEach(btn => {
+  btn.addEventListener("click", () => setNavMode(btn.dataset.mode));
+});
+
 /* ====================================================================
    OPEN LESSON
    ==================================================================== */
@@ -449,6 +474,8 @@ function openLesson(id) {
 
   const done = !!state.completed[id];
   const isDay = id.startsWith("day-");
+  state.navMode = isDay ? "plan" : "ref";
+  applyNavMode();
   const hasEx = lesson.exercises && lesson.exercises.length > 0;
   const idx = ALL_LESSONS.findIndex(l => l.id === id);
   const prev = idx > 0 ? ALL_LESSONS[idx - 1] : null;
@@ -1057,6 +1084,14 @@ if (searchInput) {
     fill("nav-basic", basic);
     fill("nav-intermediate", inter);
     fill("nav-advanced", adv);
+    // Reveal everything so a collapsed section can't hide its matches
+    document.querySelectorAll(".nav-track").forEach(tr => { tr.hidden = false; });
+    document.querySelectorAll(".nav-section").forEach(s => { s.style.display = ""; });
+    document.querySelectorAll(".collapsible").forEach(el => {
+      el.classList.remove("collapsed");
+      const arrow = el.querySelector(".collapse-arrow");
+      if (arrow) arrow.style.transform = "";
+    });
     bindNav();
   });
 }
@@ -1206,8 +1241,13 @@ function renderWelcome() {
     <div class="welcome">
       <h1>${t(T_DICT.welcomeTitle)} <span class="accent">NFA042</span></h1>
       <p>${t(T_DICT.welcomeSub)}</p>
+      <div class="wc-group-label">${t(T_DICT.modePlan)}</div>
       <div class="quick-grid">
-        ${cards.map(c => `<button class="quick-card" data-jump="${c.id}"><div class="big">${c.big}</div><div class="sub">${t(c.sub)}</div></button>`).join("")}
+        ${cards.filter(c => c.id.startsWith("day-")).map(c => `<button class="quick-card" data-jump="${c.id}"><div class="big">${c.big}</div><div class="sub">${t(c.sub)}</div></button>`).join("")}
+      </div>
+      <div class="wc-group-label">${t(T_DICT.modeRef)}</div>
+      <div class="quick-grid">
+        ${cards.filter(c => c.id.startsWith("w3-")).map(c => `<button class="quick-card" data-jump="${c.id}"><div class="big">${c.big}</div><div class="sub">${t(c.sub)}</div></button>`).join("")}
       </div>
       <div class="wc-achievements">
         <div class="wc-ach-head">
@@ -1447,7 +1487,8 @@ document.body.addEventListener("click", e => {
    KEYBOARD SHORTCUTS
    ==================================================================== */
 document.addEventListener("keydown", e => {
-  if (e.target.tagName === "INPUT") return;
+  const tag = e.target.tagName;
+  if (tag === "INPUT" || tag === "TEXTAREA" || e.target.isContentEditable) return;
   if (e.key === "/") {
     e.preventDefault();
     document.body.classList.add("drawer-open");

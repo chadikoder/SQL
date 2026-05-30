@@ -37,7 +37,7 @@
 })();
 </script>
 <style>html.has-active .welcome{display:none}</style>
-<link rel="stylesheet" href="../web/css/style.css?v=20260529">
+<link rel="stylesheet" href="../web/css/style.css?v=20260530a">
 </head>
 <body>
 
@@ -103,25 +103,34 @@
     <div class="achieve-row" id="achieve-row"></div>
   </div>
 
-  <div class="section-title collapsible" data-section="days">
-    <span data-i18n="plan7">📘 Plan 7 jours</span> <span class="collapse-arrow">▾</span>
+  <div class="nav-mode" role="tablist" aria-label="View">
+    <button class="nav-mode-btn active" data-mode="plan" role="tab" aria-selected="true"><span data-i18n="modePlan">📅 Plan</span></button>
+    <button class="nav-mode-btn" data-mode="ref" role="tab" aria-selected="false"><span data-i18n="modeRef">📖 Référence</span></button>
   </div>
-  <div id="nav-days" class="nav-section"></div>
 
-  <div class="section-title collapsible" data-section="basic">
-    <span data-i18n="basic">🟢 PHP Basic</span> <span class="collapse-arrow">▾</span>
+  <div class="nav-track" data-track="plan">
+    <div class="section-title collapsible" data-section="days">
+      <span data-i18n="plan7">📘 Plan 7 jours</span> <span class="collapse-arrow">▾</span>
+    </div>
+    <div id="nav-days" class="nav-section"></div>
   </div>
-  <div id="nav-basic" class="nav-section"></div>
 
-  <div class="section-title collapsible" data-section="intermediate">
-    <span data-i18n="intermediate">🟡 PHP Intermediate</span> <span class="collapse-arrow">▾</span>
-  </div>
-  <div id="nav-intermediate" class="nav-section"></div>
+  <div class="nav-track" data-track="ref" hidden>
+    <div class="section-title collapsible" data-section="basic">
+      <span data-i18n="basic">🟢 PHP Basic</span> <span class="collapse-arrow">▾</span>
+    </div>
+    <div id="nav-basic" class="nav-section"></div>
 
-  <div class="section-title collapsible" data-section="advanced">
-    <span data-i18n="advanced">🔴 PHP Advanced</span> <span class="collapse-arrow">▾</span>
+    <div class="section-title collapsible" data-section="intermediate">
+      <span data-i18n="intermediate">🟡 PHP Intermediate</span> <span class="collapse-arrow">▾</span>
+    </div>
+    <div id="nav-intermediate" class="nav-section"></div>
+
+    <div class="section-title collapsible" data-section="advanced">
+      <span data-i18n="advanced">🔴 PHP Advanced</span> <span class="collapse-arrow">▾</span>
+    </div>
+    <div id="nav-advanced" class="nav-section"></div>
   </div>
-  <div id="nav-advanced" class="nav-section"></div>
 
   <div class="sidebar-actions">
     <button class="sidebar-action-btn" id="export-btn" data-i18n="exportBtn">⬇️ Exporter</button>
@@ -178,7 +187,7 @@
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
 </button>
 
-<script src="../web/js/data.js?v=20260529"></script>
-<script src="../web/js/app.js?v=20260529"></script>
+<script src="../web/js/data.js?v=20260530a"></script>
+<script src="../web/js/app.js?v=20260530a"></script>
 </body>
 </html>
