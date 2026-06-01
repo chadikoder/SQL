@@ -800,14 +800,21 @@ body.drawer-open{overflow:hidden}
 .ex-counter-bar{flex:1;height:6px;background:var(--surface-3);border-radius:99px;overflow:hidden}
 .ex-counter-fill{height:100%;background:var(--grad);border-radius:99px;transition:width .5s var(--ease-out)}
 
+.ex-group{margin-top:14px}
+.ex-group:first-child{margin-top:0}
+.ex-group-head{display:flex;align-items:center;gap:10px;margin:0 0 10px;padding:0 2px}
+.ex-group-head h3{margin:0;font-size:13px;font-weight:800;color:var(--text-2);text-transform:uppercase;letter-spacing:.5px}
+.ex-group-badge{font-size:11px;font-weight:700;color:var(--text-3);background:var(--surface-2);border:1px solid var(--border);padding:2px 8px;border-radius:99px;font-variant-numeric:tabular-nums}
 .ex-cards{display:flex;flex-direction:column;gap:8px}
 .ex-card{
-  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  display:flex;align-items:center;gap:14px;
   padding:14px 18px;border-radius:var(--r-sm);
   background:var(--surface);border:1px solid var(--border);
-  transition:all .15s var(--ease);position:relative;
+  transition:all .15s var(--ease);position:relative;cursor:pointer;
 }
-.ex-card:hover{border-color:var(--border-2);transform:translateX(3px);box-shadow:var(--shadow-sm)}
+.ex-card:hover{border-color:var(--accent);transform:translateX(3px);box-shadow:var(--shadow-sm)}
+.ex-open-arrow{font-size:18px;color:var(--text-3);opacity:.5;transition:all .15s var(--ease);flex-shrink:0}
+.ex-card:hover .ex-open-arrow{opacity:1;color:var(--accent);transform:translateX(2px)}
 .ex-check{
   width:22px;height:22px;border-radius:7px;
   border:1.5px solid var(--border-2);background:var(--surface-2);
@@ -844,14 +851,79 @@ body.drawer-open{overflow:hidden}
 }
 .ex-sol-btn:hover{color:var(--text);border-color:var(--accent)}
 
-.ex-sol{
-  display:none;width:100%;flex-basis:100%;margin-top:10px;
-  background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);
-  overflow:hidden;
+.ex-sol{display:none}
+
+/* ====================================================================
+   EXERCISE MODAL — centered overlay (replaces the cramped inline expand)
+   ==================================================================== */
+.ex-modal{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px}
+.ex-modal[hidden]{display:none}
+.ex-modal-backdrop{position:absolute;inset:0;background:rgba(8,12,22,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.ex-modal-dialog{
+  position:relative;width:min(880px,100%);max-height:90vh;
+  background:var(--surface);border:1px solid var(--border-2);border-radius:14px;
+  box-shadow:0 30px 80px -10px rgba(0,0,0,.6);
+  display:flex;flex-direction:column;overflow:hidden;
+  animation:exModalIn .18s var(--ease-out);
 }
-.ex-sol.open{display:block;animation:fadeIn .2s var(--ease)}
-.ex-sol .block-code{margin:0;border:none;background:transparent}
-.ex-sol pre{margin:0;padding:14px 16px;overflow-x:auto;background:transparent;border:none;border-radius:0}
+@keyframes exModalIn{from{transform:translateY(12px) scale(.985);opacity:0}to{transform:none;opacity:1}}
+.ex-modal-close{
+  position:absolute;top:10px;right:10px;width:36px;height:36px;border-radius:10px;
+  background:var(--surface-2);border:1px solid var(--border);color:var(--text-2);
+  font-size:22px;line-height:1;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .12s var(--ease);z-index:2;font-weight:400;
+}
+.ex-modal-close:hover{background:var(--bad);border-color:var(--bad);color:#fff;transform:scale(1.06)}
+.ex-modal-head{
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:18px 60px 14px 22px;border-bottom:1px solid var(--border);
+  background:var(--surface);
+}
+.ex-modal-num{font-size:11px;font-weight:800;color:var(--text-3);letter-spacing:.6px;flex-shrink:0}
+.ex-modal-title{font-size:17px;font-weight:700;color:var(--text);margin:0;flex:1;min-width:200px;line-height:1.35}
+.ex-modal-diff{
+  font-size:10px;font-weight:800;padding:4px 10px;border-radius:99px;text-transform:uppercase;letter-spacing:.4px;flex-shrink:0;
+}
+.ex-modal-diff.easy{background:rgba(52,211,153,.14);color:var(--good)}
+.ex-modal-diff.medium{background:rgba(251,191,36,.14);color:var(--warn)}
+.ex-modal-diff.hard{background:rgba(248,113,113,.14);color:var(--bad)}
+.ex-modal-diff.extreme{background:rgba(168,85,247,.16);color:#a855f7}
+.ex-modal-body{
+  padding:20px 22px 22px;overflow-y:auto;flex:1;line-height:1.65;font-size:14.5px;color:var(--text);
+}
+.ex-modal-body code{background:var(--surface-2);padding:2px 7px;border-radius:5px;font-size:13px;font-family:JetBrains Mono,monospace;color:var(--accent)}
+.ex-modal-body strong,.ex-modal-body b{color:var(--text);font-weight:700}
+.ex-modal-body p{margin:0 0 10px}
+.ex-modal-body em,.ex-modal-body i{color:var(--text-3)}
+.ex-modal-actions{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:14px 22px;border-top:1px solid var(--border);background:var(--surface-2);
+}
+.ex-modal-actions .ex-modal-spacer{flex:1}
+.ex-modal-sol-btn{
+  font-size:13.5px;font-weight:700;padding:10px 18px;border-radius:9px;
+  background:var(--accent);color:#fff;border:1px solid transparent;
+  cursor:pointer;transition:all .12s var(--ease);letter-spacing:.2px;
+}
+.ex-modal-sol-btn:hover{filter:brightness(1.12);transform:translateY(-1px)}
+.ex-modal-sol-btn.open{background:rgba(248,113,113,.14);color:var(--bad);border-color:rgba(248,113,113,.5)}
+.ex-modal-sol-btn.open:hover{background:rgba(248,113,113,.22);filter:none}
+.ex-modal-sol{
+  border-top:1px solid var(--border);max-height:55vh;overflow:auto;
+  background:var(--surface-2);
+}
+.ex-modal-sol[hidden]{display:none}
+.ex-modal-sol pre{margin:0;padding:16px 18px;background:transparent;border:none;border-radius:0;font-size:13px;line-height:1.55}
+.ex-modal-sol .block-code{margin:0;border:none;background:transparent}
+@media (max-width:600px){
+  .ex-modal{padding:0}
+  .ex-modal-dialog{width:100%;height:100%;max-height:100vh;border-radius:0;border:none;animation:none}
+  .ex-modal-head{padding:16px 56px 12px 16px}
+  .ex-modal-body{padding:16px}
+  .ex-modal-actions{padding:12px 16px;gap:8px}
+  .ex-modal-sol-btn{padding:10px 14px;font-size:13px;flex:1;min-width:140px}
+  .ex-modal-sol{max-height:60vh}
+}
 
 /* Random-practice flash highlight */
 .ex-card.flash{animation:exFlash 1.4s var(--ease-out)}

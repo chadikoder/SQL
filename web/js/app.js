@@ -687,33 +687,8 @@ function renderExArea(lesson) {
   const randomBtn = area.querySelector("#random-ex-btn");
   if (randomBtn) randomBtn.addEventListener("click", jumpToRandomExercise);
 
-  // Confidence rating
-  area.querySelectorAll(".ex-conf .conf-btn").forEach(btn => {
-    btn.addEventListener("click", e => {
-      e.stopPropagation();
-      const key = btn.parentElement.dataset.key;
-      const val = btn.dataset.conf;
-      if (state.confidence[key] === val) delete state.confidence[key];
-      else state.confidence[key] = val;
-      saveState();
-      renderExArea(lesson);
-      bindCopyButtons();
-    });
-  });
-
-  // Solution toggle
-  area.querySelectorAll(".ex-sol-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const key = btn.dataset.key;
-      const block = document.getElementById("sol-" + key);
-      if (!block) return;
-      const open = block.classList.toggle("open");
-      btn.textContent = open ? T.hideSol : T.viewSol;
-    });
-  });
-
-  // Bookmark toggle
-  area.querySelectorAll(".ex-bookmark").forEach(bm => {
+  // Bookmark toggle (kept on the card so users can bookmark without opening)
+  area.querySelectorAll(".ex-card .ex-bookmark").forEach(bm => {
     bm.addEventListener("click", e => {
       e.stopPropagation();
       const key = bm.dataset.key;
@@ -721,6 +696,26 @@ function renderExArea(lesson) {
       else state.bookmarks[key] = Date.now();
       saveState();
       renderExArea(lesson);
+    });
+  });
+
+  // Card click / Enter / Space → open modal (ignore clicks on check + bookmark)
+  function openCardModal(card) {
+    const exNum = parseInt(card.dataset.num, 10);
+    const ex = (lesson.exercises || []).find(x => x.num === exNum);
+    if (ex) openExModal(lesson, ex);
+  }
+  area.querySelectorAll(".ex-card").forEach(card => {
+    card.addEventListener("click", e => {
+      if (e.target.closest(".ex-check") || e.target.closest(".ex-bookmark")) return;
+      openCardModal(card);
+    });
+    card.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") {
+        if (e.target.closest(".ex-check") || e.target.closest(".ex-bookmark")) return;
+        e.preventDefault();
+        openCardModal(card);
+      }
     });
   });
 }
@@ -800,28 +795,123 @@ function renderExCard(lesson, ex) {
   const key = lesson.id + "-" + ex.num;
   const exDone = !!state.exDone[key];
   const isBm = !!state.bookmarks[key];
-  const conf = state.confidence[key] || "";
   const diffLbl = { easy: T.diffEasy, medium: T.diffMedium, hard: T.diffHard, extreme: T.diffExtreme };
-  return `<div class="ex-card ${exDone ? "done" : ""}" id="ex-${key}">
+  return `<div class="ex-card ${exDone ? "done" : ""}" id="ex-${key}" data-lesson="${lesson.id}" data-num="${ex.num}" role="button" tabindex="0">
     <span class="ex-check ${exDone ? "done" : ""}" data-key="${key}" title="${T.markedAriaLabel}">${exDone ? "✓" : ""}</span>
     <div class="ex-info">
       <div class="ex-num">#${ex.num}</div>
       <div class="ex-title">${esc(t(ex.title))}</div>
-      ${ex.desc ? `<div class="ex-desc">${esc(t(ex.desc))}</div>` : ""}
     </div>
     <span class="ex-diff ${ex.diff}">${diffLbl[ex.diff] || ex.diff}</span>
+    <button class="ex-bookmark ${isBm ? "active" : ""}" data-key="${key}" title="${isBm ? T.removeBookmark : T.addBookmark}">${isBm ? "🔖" : "🏷️"}</button>
+    <span class="ex-open-arrow" aria-hidden="true">›</span>
+  </div>`;
+}
+
+/* ====================================================================
+   EXERCISE MODAL — centered overlay opened on card click
+   ==================================================================== */
+let _exModalCurrent = null;  // { lesson, ex, key }
+
+function openExModal(lesson, ex) {
+  const modal = document.getElementById("ex-modal");
+  if (!modal) return;
+  const key = lesson.id + "-" + ex.num;
+  _exModalCurrent = { lesson, ex, key };
+
+  const diffLbl = { easy: T.diffEasy, medium: T.diffMedium, hard: T.diffHard, extreme: T.diffExtreme };
+  document.getElementById("ex-modal-num").textContent = "#" + ex.num;
+  document.getElementById("ex-modal-title").textContent = t(ex.title);
+  const diffEl = document.getElementById("ex-modal-diff");
+  diffEl.className = "ex-modal-diff " + ex.diff;
+  diffEl.textContent = diffLbl[ex.diff] || ex.diff;
+  document.getElementById("ex-modal-body").innerHTML = t(ex.desc || "");
+
+  const conf = state.confidence[key] || "";
+  const isBm = !!state.bookmarks[key];
+  document.getElementById("ex-modal-actions").innerHTML = `
+    <button class="ex-modal-sol-btn" id="ex-modal-sol-btn">${T.viewSol}</button>
+    <div class="ex-modal-spacer"></div>
     <div class="ex-conf" data-key="${key}" title="${T.confLabel}">
       <button class="conf-btn got ${conf === "got" ? "active" : ""}" data-conf="got" title="${T.confGot}">😎</button>
       <button class="conf-btn shaky ${conf === "shaky" ? "active" : ""}" data-conf="shaky" title="${T.confShaky}">😐</button>
       <button class="conf-btn no ${conf === "no" ? "active" : ""}" data-conf="no" title="${T.confNo}">😵</button>
     </div>
     <button class="ex-bookmark ${isBm ? "active" : ""}" data-key="${key}" title="${isBm ? T.removeBookmark : T.addBookmark}">${isBm ? "🔖" : "🏷️"}</button>
-    <button class="ex-sol-btn" data-key="${key}">${T.viewSol}</button>
-    <div class="ex-sol" id="sol-${key}">
-      <div class="block-code"><pre><code>${highlightPhp(t(ex.sol))}</code></pre></div>
-    </div>
-  </div>`;
+  `;
+  const solBox = document.getElementById("ex-modal-sol");
+  solBox.innerHTML = `<div class="block-code"><pre><code>${highlightPhp(t(ex.sol))}</code></pre></div>`;
+  solBox.hidden = true;
+
+  const solBtn = document.getElementById("ex-modal-sol-btn");
+  solBtn.classList.remove("open");
+  solBtn.textContent = T.viewSol;
+  solBtn.addEventListener("click", () => {
+    const showing = !solBox.hidden;
+    solBox.hidden = showing;
+    solBtn.classList.toggle("open", !showing);
+    solBtn.textContent = !showing ? T.hideSol : T.viewSol;
+    if (!showing) bindCopyButtons();
+  });
+
+  document.querySelectorAll("#ex-modal-actions .conf-btn").forEach(btn => {
+    btn.addEventListener("click", e => {
+      e.stopPropagation();
+      const val = btn.dataset.conf;
+      if (state.confidence[key] === val) delete state.confidence[key];
+      else state.confidence[key] = val;
+      saveState();
+      openExModal(lesson, ex);
+    });
+  });
+
+  document.querySelectorAll("#ex-modal-actions .ex-bookmark").forEach(bm => {
+    bm.addEventListener("click", e => {
+      e.stopPropagation();
+      if (state.bookmarks[key]) delete state.bookmarks[key];
+      else state.bookmarks[key] = Date.now();
+      saveState();
+      openExModal(lesson, ex);
+      const card = document.getElementById("ex-" + key);
+      if (card) {
+        const bmCard = card.querySelector(".ex-bookmark");
+        if (bmCard) {
+          const on = !!state.bookmarks[key];
+          bmCard.classList.toggle("active", on);
+          bmCard.textContent = on ? "🔖" : "🏷️";
+        }
+      }
+    });
+  });
+
+  modal.hidden = false;
+  document.documentElement.style.overflow = "hidden";
 }
+
+function closeExModal() {
+  const modal = document.getElementById("ex-modal");
+  if (!modal) return;
+  modal.hidden = true;
+  document.documentElement.style.overflow = "";
+  _exModalCurrent = null;
+}
+
+(function wireExModalShell() {
+  function init() {
+    const closeBtn = document.getElementById("ex-modal-close");
+    const backdrop = document.getElementById("ex-modal-backdrop");
+    if (closeBtn) closeBtn.addEventListener("click", closeExModal);
+    if (backdrop) backdrop.addEventListener("click", closeExModal);
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape" && _exModalCurrent) {
+        e.stopPropagation();
+        closeExModal();
+      }
+    }, true);
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+  else init();
+})();
 
 /* ====================================================================
    COPY BUTTON
