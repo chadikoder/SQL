@@ -454,7 +454,7 @@ body.drawer-open{overflow:hidden}
   padding:9px 10px;border-radius:8px;
   font-size:13px;color:var(--text-2);
   border:1px solid transparent;
-  transition:all .15s var(--ease);
+  transition:background-color .15s var(--ease),color .15s var(--ease),border-color .15s var(--ease),transform .15s var(--ease);
   position:relative;
 }
 .nav-item:hover{background:var(--surface-2);color:var(--text);transform:translateX(2px)}
@@ -810,10 +810,10 @@ body.drawer-open{overflow:hidden}
   display:flex;align-items:center;gap:14px;
   padding:14px 18px;border-radius:var(--r-sm);
   background:var(--surface);border:1px solid var(--border);
-  transition:all .15s var(--ease);position:relative;cursor:pointer;
+  transition:border-color .15s var(--ease),background-color .15s var(--ease),box-shadow .15s var(--ease);position:relative;cursor:pointer;
 }
-.ex-card:hover{border-color:var(--accent);transform:translateX(3px);box-shadow:var(--shadow-sm)}
-.ex-open-arrow{font-size:18px;color:var(--text-3);opacity:.5;transition:all .15s var(--ease);flex-shrink:0}
+.ex-card:hover{border-color:var(--accent);box-shadow:var(--shadow-sm)}
+.ex-open-arrow{font-size:18px;color:var(--text-3);opacity:.5;transition:color .15s var(--ease),opacity .15s var(--ease),transform .15s var(--ease);flex-shrink:0}
 .ex-card:hover .ex-open-arrow{opacity:1;color:var(--accent);transform:translateX(2px)}
 .ex-check{
   width:22px;height:22px;border-radius:7px;

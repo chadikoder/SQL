@@ -227,9 +227,26 @@ function defaultState() {
   return { completed: {}, exDone: {}, bookmarks: {}, lastActive: null, theme: "dark", lang: "fr", sectionsCollapsed: {}, achSeen: null, dailyGoal: 10, confidence: {}, masteredSeen: {}, goalReachedDate: null, pomo: null, quizAnswers: {}, navMode: "plan" };
 }
 
-function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+let _saveTimer = 0;
+let _lastSavedJson = "";
+function _flushSave() {
+  _saveTimer = 0;
+  try {
+    const json = JSON.stringify(state);
+    if (json === _lastSavedJson) return;          // skip redundant writes
+    localStorage.setItem(STORAGE_KEY, json);
+    _lastSavedJson = json;
+  } catch (e) {
+    // QuotaExceeded or serialization error — don't crash the app
+  }
 }
+function saveState() {
+  if (_saveTimer) return;
+  _saveTimer = setTimeout(_flushSave, 200);
+}
+// Flush pending writes on tab close / hide so a freshly-toggled checkbox isn't lost.
+window.addEventListener("pagehide", () => { if (_saveTimer) { clearTimeout(_saveTimer); _flushSave(); } });
+window.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden" && _saveTimer) { clearTimeout(_saveTimer); _flushSave(); } });
 
 function esc(s) {
   return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
